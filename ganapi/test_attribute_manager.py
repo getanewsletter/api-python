@@ -79,3 +79,28 @@ class ContactManagerTest(unittest.TestCase):
         attribute.code = 'changed-attribute'
         with HTTMock(self.delete_attribute_mock):
             self.attribute_manager.delete(attribute)
+
+    @all_requests
+    def get_paginated_attributes_mock(self, url, request):
+        content = '{"count":16,"next":"https://api.getanewsletter.com/v3/attributes/?page=2","previous":null,"results":[{"url":"https://api.getanewsletter.com/v3/attributes/attribute/","name":"attribute","code":"attribute","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/attribute2/","name":"Attribute2","code":"attribute2","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu/","name":"bu","code":"bu","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu1/","name":"bu1","code":"bu1","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu2/","name":"bu2","code":"bu2","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu3/","name":"bu3","code":"bu3","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu4/","name":"bu4","code":"bu4","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu5/","name":"bu5","code":"bu5","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu6/","name":"bu6","code":"bu6","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu7/","name":"bu7","code":"bu7","usage_count":0}]}'
+        status_code = 200
+        return {'content': content,
+                'status_code': status_code}
+
+    def get_paginated_attributes_page2_mock(self, url, request):
+        content = '{"count":16,"next":null,"previous":"https://api.getanewsletter.com/v3/attributes/","results":[{"url":"https://api.getanewsletter.com/v3/attributes/bu8/","name":"bu8","code":"bu8","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu9/","name":"bu9","code":"bu9","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu10/","name":"bu10","code":"bu10","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu11/","name":"bu11","code":"bu11","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu12/","name":"bu12","code":"bu12","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu13/","name":"bu13","code":"bu13","usage_count":0}]}'
+        status_code = 200
+        return {'content': content,
+                'status_code': status_code}
+
+    def test_get_paginated_attributes(self):
+        with HTTMock(self.get_paginated_attributes_mock):
+            paginated_result_set = self.attribute_manager.query({})
+        self.assertEqual(len(paginated_result_set.entities), 10)
+        self.assertTrue(isinstance(paginated_result_set.entities[0], Attribute))
+
+        with HTTMock(self.get_paginated_attributes_page2_mock):
+            next_result_set = paginated_result_set.next()
+        self.assertEqual(len(next_result_set.entities), 6)
+
+        self.assertRaises(StopIteration, next_result_set.next)

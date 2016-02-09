@@ -1,4 +1,5 @@
 import urllib
+from helpers import PaginatedResultSet
 
 
 class EntityManager(object):
@@ -16,12 +17,12 @@ class EntityManager(object):
     """
     base_path = None
     """
-    The class of the entity (e.g. 'Gan\Contact').
+    The class of the entity (e.g. 'Contact').
     :var entity_class string
     """
     entity_class = None
     """
-    List listing all writable fields. It is required by the default normalizeEntity()
+    List listing all writable fields. It is required by the default normalize_entity()
     method that is used to clean up the entity before sending it to the API.
     :var writable_fields list
     """
@@ -40,7 +41,7 @@ class EntityManager(object):
         Method used by the entity manager to construct the resource path.
 
         This method would simply concatenate the lookup id at the end of
-        the base path: presource/<id>/. You may have to override it if you
+        the base path: resource/<id>/. You may have to override it if you
         have an unusual resource path scheme (for example the the subscribers'
         endpoint: lists/<hash>/subscribers/<email>/).
 
@@ -102,7 +103,6 @@ class EntityManager(object):
         data = {}
         for property in self.writable_fields:
             if getattr(entity, property):
-                # setattr(entity, property, data[property])
                 data[property] = getattr(entity, property)
         return data
 
@@ -170,18 +170,13 @@ class EntityManager(object):
         page and paginate_by which are common.
 
         :param filters dict of query parameters (e.g. {'search_email': 'test@', 'page': 2})
-        :returns array The result array of entities.
+        :returns class PaginatedResultSet which can iterate over pages PaginatedResultSet.entities is the current page array of entities.
         :raises RequestException if there is an error from the API.
         """
         uri = u'{base_path}/?{encoded_filters}'.format(base_path=str.rstrip(self.base_path),
                                                        encoded_filters=urllib.urlencode(filters))
-
         response = self.api.call('GET', uri)
-        result = []
-        for data in response.json().get('results'):
-            result.append(self.construct_entity(data).set_persisted())
-
-        return result
+        return PaginatedResultSet(self, response.json())
 
     def delete(self, entity):
         """

@@ -50,11 +50,11 @@ class Api():
             payload = json.dumps(payload)
 
         if method == 'GET':
-            response = requests.get(uri, headers=self.headers, data=payload)
+            response = requests.get(uri, headers=self.headers)
         elif method == 'POST':
             response = requests.post(uri, headers=self.headers, data=payload)
         elif method == 'DELETE':
-            response = requests.delete(uri, headers=self.headers, data=payload)
+            response = requests.delete(uri, headers=self.headers)
         elif method == 'PUT':
             response = requests.put(uri, headers=self.headers, data=payload)
         elif method == 'PATCH':

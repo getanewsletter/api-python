@@ -1,7 +1,6 @@
 import unittest
 from api import Api
 from contact import Contact
-
 from contact_manager import ContactManager
 from httmock import HTTMock, all_requests
 
@@ -118,8 +117,9 @@ class ContactManagerTest(unittest.TestCase):
         }
         with HTTMock(self.find_contact_by_query_mock):
             result = self.contact_manager.query(filters=query)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].email, 'test@example.com')
+            contacts = result.entities
+        self.assertEqual(len(contacts), 1)
+        self.assertEqual(contacts[0].email, 'test@example.com')
 
     @all_requests
     def delete_contact_mock(self, url, request):
