@@ -63,15 +63,6 @@ class ContactManagerTest(unittest.TestCase):
         contact = Contact()
         contact.email = 'test@example.com'
         contact.first_name = 'John'
-
-        """payload = {
-            'attributes': [],
-            'first_name': 'John',
-            'last_name': None,
-            'lists': []
-        }"""
-        # self.contact_manager.api.call('POST', 'contacts/', payload)
-        # assert this is whats called above
         with HTTMock(self.create_new_contact_mock):
             saved_contact = self.contact_manager.save(contact)
         self.assertTrue(isinstance(saved_contact, Contact))
@@ -93,7 +84,6 @@ class ContactManagerTest(unittest.TestCase):
         self.assertTrue(isinstance(saved_contact, Contact))
 
     def test_update_without_email(self):
-        # supposed to raise exception
         contact = Contact()
         contact.first_name = 'John'
         contact.set_persisted()

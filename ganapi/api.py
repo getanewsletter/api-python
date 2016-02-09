@@ -22,11 +22,6 @@ class Api():
     """
 
     def __init__(self, token, base_uri=None):
-        """ #The JSON response is going to be deserialized to associative arrays:
-            # $json_handler = new Httpful\Handlers\JsonHandler(array('decode_as_array' => true));
-            # Httpful\Httpful::register('application/json', $json_handler);
-            FIXME IS THIS NEEDED here?
-        """
         self.token = token
         self.base_uri = base_uri if base_uri else self.default_base_uri
         self.headers = {'Accept': 'application/json',
