@@ -18,7 +18,7 @@ class Api():
     """
         Initializes the API connection
         :param string token The security token.
-        :param string baseUri (optional) Alternative API base URI.
+        :param string base_uri (optional) Alternative API base URI.
     """
 
     def __init__(self, token, base_uri=None):
