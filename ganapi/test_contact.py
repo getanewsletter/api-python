@@ -12,9 +12,11 @@ class ContactTest(unittest.TestCase):
         self.api = Api(token=gan_token)
         self.contact_manager = ContactManager(self.api)
         self.list_manager = ListManager(self.api)
+        self.start_path = '/v3'
 
     @all_requests
     def contact_mock(self, url, request):
+        self.assertEqual(url.path, self.start_path + '/contacts/')
         payload = '{"attributes": {}, "email": "tester@example.com", "lists": []}'
         self.assertEqual(request.body, payload)
         content = '{"url":"https://api.getanewsletter.com/v3/contacts/tester@example.com/","first_name":"","last_name":"","email":"tester@example.com","created":"2016-02-08T14:48:24","updated":"2016-02-09T09:09:28.878356","attributes":{},"lists":[],"active":true}'
@@ -23,6 +25,7 @@ class ContactTest(unittest.TestCase):
 
     @all_requests
     def subscribed_contact_mock(self, url, request):
+        self.assertEqual(url.path, self.start_path + '/contacts/tester@example.com/')
         content = '{"url":"https://api.getanewsletter.com/v3/contacts/tester@example.com/","first_name":"","last_name":"","email":"tester@example.com","created":"2016-02-08T14:48:24","updated":"2016-02-09T09:17:10.869772","attributes":{},"lists":[{"subscription_cancelled":null,"subscription_id":136363367,"hash":"2anfLVM","name":"Test list","subscription_created":"2016-02-09T08:17:10Z"}],"active":true}'
         status_code = 200
         return {'status_code': status_code,
