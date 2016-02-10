@@ -4,7 +4,7 @@ import math
 from requests.exceptions import RequestException
 
 
-class Api():
+class Api(object):
     """
         Handles connection to the API
     """
