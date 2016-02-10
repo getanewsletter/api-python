@@ -11,15 +11,19 @@ class PaginatedResultSet():
     """
     def __init__(self, manager, data):
         self.manager = manager
-        self.entities = []
-        for result in data.get('results'):
-            self.entities.append(self.manager.construct_entity(result).set_persisted())
+        self.entities = self.build_entities_list(data.get('results'))
         self.count = data.get('count')
         self.next_link = data.get('next')
         self.previous_link = data.get('previous')
 
     def __iter__(self):
         return self
+
+    def build_entities_list(self, results):
+        list = []
+        for result in results:
+            list.append(self.manager.construct_entity(result).set_persisted())
+        return list
 
     def url_params_to_dict(self, url):
         """
@@ -32,24 +36,34 @@ class PaginatedResultSet():
 
     def next(self):
         """
-        Get next page of entity results
-        :return: PaginatedResultSet of next result page
+        Update Object with next page of entity results and return list of the entities.
+        :return: list of entities of next result page
         :raises: StopIteration if no next is available
         """
         if self.next_link:
             query_dict = self.url_params_to_dict(self.next_link)
-            return self.manager.query(filters=query_dict)
+            next_data = self.manager.query(filters=query_dict, as_json=True)
+            self.count = next_data.get('count')
+            self.next_link = next_data.get('next')
+            self.previous_link = next_data.get('previous')
+            self.entities = self.build_entities_list(next_data.get('results'))
+            return self.entities
         else:
             raise StopIteration
 
-    def previous(self):
+    def prev(self):
         """
-        Get next page of entity results
+        Update Object with previous page of entity results and return list of the entities.
         :return: PaginatedResultSet of previous result page
         :raises: StopIteration if no previous is available
         """
         if self.previous_link:
             query_dict = self.url_params_to_dict(self.previous_link)
-            return self.manager.query(filters=query_dict)
+            prev_data = self.manager.query(filters=query_dict, as_json=True)
+            self.count = prev_data.get('count')
+            self.next_link = prev_data.get('next')
+            self.previous_link = prev_data.get('previous')
+            self.entities = self.build_entities_list(prev_data.get('results'))
+            return self.entities
         else:
             raise StopIteration

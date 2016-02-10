@@ -161,7 +161,7 @@ class EntityManager(object):
         """
         return self.save(entity, True)
 
-    def query(self, filters=dict()):
+    def query(self, filters=dict(), as_json=False):
         """
         Low level method for making search queries.
 
@@ -170,12 +170,16 @@ class EntityManager(object):
         page and paginate_by which are common.
 
         :param filters dict of query parameters (e.g. {'search_email': 'test@', 'page': 2})
-        :returns class PaginatedResultSet which can iterate over pages PaginatedResultSet.entities is the current page array of entities.
+        :param as_json default False set to True to return json
+        :returns class PaginatedResultSet which can iterate over pages PaginatedResultSet.entities is the current page list of entities.
         :raises RequestException if there is an error from the API.
         """
         uri = u'{base_path}/?{encoded_filters}'.format(base_path=str.rstrip(self.base_path),
                                                        encoded_filters=urllib.urlencode(filters))
         response = self.api.call('GET', uri)
+
+        if as_json:
+            return response.json()
         return PaginatedResultSet(self, response.json())
 
     def delete(self, entity):

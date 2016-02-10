@@ -115,7 +115,9 @@ class ContactManagerTest(unittest.TestCase):
         self.assertTrue(isinstance(paginated_result_set.entities[0], Attribute))
 
         with HTTMock(self.get_paginated_attributes_page2_mock):
-            next_result_set = paginated_result_set.next()
-        self.assertEqual(len(next_result_set.entities), 6)
+            next_results_list = paginated_result_set.next()
+        self.assertEqual(len(next_results_list), 6)
 
-        self.assertRaises(StopIteration, next_result_set.next)
+        self.assertEqual(len(paginated_result_set.entities), 6)
+
+        self.assertRaises(StopIteration, paginated_result_set.next)
