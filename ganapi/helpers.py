@@ -20,6 +20,10 @@ class PaginatedResultSet():
         return self
 
     def build_entities_list(self, results):
+        """
+        :param results: results response of entities from api
+        :return: list of constructed entities
+        """
         list = []
         for result in results:
             list.append(self.manager.construct_entity(result).set_persisted())
