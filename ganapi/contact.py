@@ -19,7 +19,7 @@ class Contact(Entity):
         """
         Subscribes the contact to a list.
 
-        Do not forget to call ContactManager.save()!
+        Do not forget to call contact.save()!
 
         :param list The list to subscribe on.
         """

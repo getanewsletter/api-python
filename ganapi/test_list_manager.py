@@ -28,12 +28,11 @@ class ListManagerTest(unittest.TestCase):
         self.assertTrue(list.is_persisted())
 
     def test_update_without_hash(self):
-        # Expects exception
         list = self.list_manager.create()
         list.name = 'list'
         list.sender = 'John Doe'
         list.set_persisted()
-        self.assertRaises(Exception, self.list_manager.save, list)
+        self.assertRaises(Exception, list.save)
 
     @all_requests
     def create_new_list_mock(self, url, request):
