@@ -29,7 +29,7 @@ class ContactManager(EntityManager):
         """
         data = super(ContactManager, self).normalize_entity(entity)
 
-        if not type(dict()) == type(data.get('attributes')):
+        if not isinstance(data.get('attributes'), type(dict())):
             data['attributes'] = dict()
 
         list_manager = ListManager(self.api)
