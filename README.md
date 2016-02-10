@@ -66,6 +66,26 @@ except RequestException as e:
 
 ```
 
+### Querying for contacts
+You have to create an instance of the ```ContactManager``` class and then use it's ```query()``` method to retrieve the contacts you need.
+```query()``` takes a dict of [url parameters](https://api.getanewsletter.com/v3/docs/contacts/#get-contacts)  and will return a ```PaginatedResultSet``` with the first page of contacts in a list in PaginatedResultSet.entities.
+
+```python
+# Get PaginatedResultSet containing contacts with emails starting with name@.
+queried_contacts = contact_manager.query({'search_email': 'name@'})
+
+# list of contacts in current page(1)
+queried_contacts.entities
+
+# list of contacts in next page(2) if available and update PaginatedResultSet
+queried_contacts.next()
+
+# list of contacts in previous page(1) if available and update PaginatedResultSet
+queried_contacts.prev()
+
+
+```
+
 #### Creating a contact
 ```python
 
@@ -187,3 +207,118 @@ contact.email = 'john.doe@example.com'
 contact.subscribe_to(list)
 contact.save()
 ```
+
+
+#### The attribute object
+The instances of the Attribute class represent the attribute entities in the API.
+They have the following fields:
+
+*Required fields*
+* ```name``` - attribute name.
+
+*Lookup field*
+* ```code``` - the slugified attribute code. required when updating or deleting the attribute. *The name "A new attribute" code will be "a-new-attribute"*
+
+*Read-only fields*
+* ```url``` - the attribute resource URL.
+* ```usage_count``` - number of usages.
+
+
+#### Retreiving an attribute
+You have to create an instance of the ```AttributeManager``` class and then use it's ```get()``` method to retrieve the attribute you need.
+```python
+from ganapi import AttributeManager
+
+attribute_manager = AttributeManager(gan)
+attribute = attribute_manager.get('code')
+```
+The manager methods will throw an ```RequestException``` in case of HTTP error from the API, so it's a good idea to catch it.
+```python
+
+try:
+    attribute = attribute_manager.get('code')
+except RequestException as e:
+    if e.response.code == 404:
+        print 'Attribute not found!'
+    else:
+        print 'API error: ' + e
+
+
+```
+
+#### Creating an attribute
+```python
+
+attribute = attribute_manager.create()
+attribute.name = 'City'
+
+attribute.save()
+```
+This will create a new attribute and save it. Again, it'll be a good idea to catch exceptions when calling the ```save()``` method. The API will respond with an error if the contact already exists.
+One way to avoid it is to force the creation of the contact, overwriting the existing one:
+```python
+
+attribute.overwrite()
+```
+
+Both ```save()``` and ```overwrite()``` will return the same contact object with it's read-only fields updated (e.g. ```url```, ```usage_count```).
+
+```python
+
+attribute = attribute.save()
+print attribute.usage_count
+```
+
+#### Updating an existing attribute
+```python
+
+# Get the attribute.
+attribute = attribute_manager.get('code')
+# Change name field.
+attribute.name = 'Changed!'
+# Save it.
+attribute.save()
+```
+You can avoid making two calls to the API by forcing a *partial update*.
+```python
+
+attribute = attribute_manager.create()
+attribute.set_persisted()
+attribute.code = 'code'
+attribute.name = 'Changed!'
+attribute.save()
+```
+Calling ```set_persisted()``` on the attribute object marks it like it's already existing and coming from the API. The calls to the ```save()``` method when a contact is made as existing will do only a *partial update*, i.e. update only the supplied fields and skipping all the ```None``` fields.
+Do not forget that ```code``` is a ***_lookup field_*** and required when updating or deleting the attribute.
+
+#### Deleting an attribute
+```python
+
+attribute.delete()
+```
+
+
+
+#### The PaginatedResultSet class
+The instance of the PaginatedResultSet class represent the result of get from the API.
+
+*Parameters*
+* ```data``` - json of result from the ```query()``` method in the managers.
+* ```manager``` - the manager using ```query()```.
+
+*Properties*
+* ```next_link``` - URL to get the next page of the results.
+* ```previous_link``` - URL to get the previous page of the results.
+* ```manager``` - ```EntityManager``` currently used.
+* ```entities``` - List of ```Entity``` for the current result page.
+* ```count``` - Total amount of entity results in all pages.
+
+*Methods*
+* ```prev()``` - replaces the instance with results from the previous page and returns entities.
+* ```next()``` - replaces the instance with results from the next page and returns entities.
+
+```next()``` and ```prev()``` will raise ```StopIteration``` if the end of the direction has been reached.
+They will raise ```RequestException``` in case of HTTP error from the API,
+
+
+
