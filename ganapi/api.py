@@ -1,9 +1,6 @@
 import json
 import requests
-import math
-from requests.exceptions import RequestException
-
-
+from gan_exception import GanException
 class Api(object):
     """
         Handles connection to the API
@@ -41,7 +38,7 @@ class Api(object):
             :param resource_path string The path to the resource (e.g. contacts/john@example.com/)
             :param payload string The data that is sent to the service. Not used for GET or DELETE.
             :return response The Requests response object from the service.
-            :raises Exception
+            :raises GanException in case of invalid HTTP method or HTTPError
         """
         uri = u'{base_uri}{resource_path}'.format(base_uri=self.base_uri,
                                                   resource_path=resource_path)
@@ -59,8 +56,10 @@ class Api(object):
             response = requests.put(uri, headers=self.headers, data=payload)
         elif method == 'PATCH':
             response = requests.patch(uri, headers=self.headers, data=payload)
+        else:
+            raise GanException(u'Invalid HTTP method',
+                               u'{method} is not a valid HTTP method! Valid HTTP methods are GET, POST, DELETE, PUT, PATCH.'.format(method=method))
 
-        if math.floor(response.status_code / 100) != 2:
-            raise RequestException(response.status_code, response.content)
+        response.raise_for_status()
 
         return response

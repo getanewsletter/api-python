@@ -3,7 +3,7 @@ from api import Api
 from list import List
 from list_manager import ListManager
 from httmock import HTTMock, all_requests
-
+from gan_exception import GanException
 
 class ListManagerTest(unittest.TestCase):
     def setUp(self):
@@ -32,7 +32,7 @@ class ListManagerTest(unittest.TestCase):
         list.name = 'list'
         list.sender = 'John Doe'
         list.set_persisted()
-        self.assertRaises(Exception, list.save)
+        self.assertRaises(GanException, list.save)
 
     @all_requests
     def create_new_list_mock(self, url, request):

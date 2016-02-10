@@ -1,6 +1,6 @@
 import urllib
 from helpers import PaginatedResultSet
-
+from api import GanException
 
 class EntityManager(object):
     """
@@ -67,7 +67,7 @@ class EntityManager(object):
 
         lookup_field = self.lookup_field
         if not getattr(entity, lookup_field):
-            raise Exception(u'Missing required property: {lookup_field}'.format(lookup_field=lookup_field))
+            raise GanException(u'Missing required property', u'Missing: {lookup_field}'.format(lookup_field=lookup_field))
 
         return self.get_path(getattr(entity, lookup_field))
 
@@ -134,8 +134,8 @@ class EntityManager(object):
         :param entity: The entity object to update/save.
         :param overwrite: Set to True if you want
         :return: The updated/created entity.
-        :raises RequestException if there is an error from the API
-        :raises Exception if the normalixation fails, i.e. missing lookup field.
+        :raises HTTPError if there is an error from the API
+        :raises GanException if the normalization fails, i.e. missing lookup field.
         """
         data = self.normalize_entity(entity)
         if overwrite:

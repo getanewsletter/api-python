@@ -5,3 +5,4 @@ from list_manager import ListManager
 from attribute import Attribute
 from contact import Contact
 from list import List
+from gan_exception import GanException

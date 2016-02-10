@@ -3,6 +3,7 @@ from api import Api
 from attribute import Attribute
 from attribute_manager import AttributeManager
 from httmock import HTTMock, all_requests
+from requests import HTTPError
 
 
 class ContactManagerTest(unittest.TestCase):
@@ -29,7 +30,7 @@ class ContactManagerTest(unittest.TestCase):
 
     @all_requests
     def get_non_existing_attribute_mock(self, url, request):
-        self.assertEqual(url.path, self.start_path + '/attribute/non_existing/')
+        self.assertEqual(url.path, self.start_path + '/attributes/non_existing/')
         status_code = 404
         content = '{"detail":"Not found."}'
         return {'status_code': status_code,
@@ -37,7 +38,7 @@ class ContactManagerTest(unittest.TestCase):
 
     def test_get_non_existing_attribute(self):
         with HTTMock(self.get_non_existing_attribute_mock):
-            self.assertRaises(Exception, self.attribute_manager.get, 'not_existing')
+            self.assertRaises(HTTPError, self.attribute_manager.get, 'non_existing')
 
     @all_requests
     def create_attribute_mock(self, url, request):

@@ -1,9 +1,9 @@
 import unittest
-from api import Api
+from api import Api, GanException
 from contact import Contact
 from contact_manager import ContactManager
 from httmock import HTTMock, all_requests
-
+from requests import HTTPError
 
 class ContactManagerTest(unittest.TestCase):
     def setUp(self):
@@ -48,11 +48,7 @@ class ContactManagerTest(unittest.TestCase):
 
     def test_non_existing_contact(self):
         with HTTMock(self.non_existing_contact_mock):
-            try:
-                non_existing_contact = self.contact_manager.get('noone@nothing.com')
-            except Exception as e:
-                self.assertEqual(e[0], 404)
-                self.assertEqual(e[1], '{"detail":"Not found."}')
+            self.assertRaises(HTTPError, self.contact_manager.get, 'noone@nothing.com')
 
     @all_requests
     def create_new_contact_mock(self, url, request):
@@ -94,7 +90,7 @@ class ContactManagerTest(unittest.TestCase):
         contact = self.contact_manager.create()
         contact.first_name = 'John'
         contact.set_persisted()
-        self.assertRaises(Exception, contact.save)
+        self.assertRaises(GanException, contact.save)
 
     @all_requests
     def overwrite_contact_mock(self, url, request):
