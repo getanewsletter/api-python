@@ -32,15 +32,15 @@ class ContactTest(unittest.TestCase):
                 'content': content}
 
     def test_subscribe_to_list(self):
-        new_contact = Contact()
+        new_contact = self.contact_manager.create()
         new_contact.email = 'tester@example.com'
         with HTTMock(self.contact_mock):
-            new_contact = self.contact_manager.save(new_contact)
+            new_contact = new_contact.save()
         self.assertEqual(new_contact.lists, [])
 
         list = self.list_manager.construct_entity({'hash': '2anfLVM'})
         new_contact.subscribe_to(list)
         self.assertEqual(len(new_contact.lists), 1)
         with HTTMock(self.subscribed_contact_mock):
-            saved_contact = self.contact_manager.save(new_contact)
+            saved_contact = new_contact.save()
         self.assertEqual(saved_contact.lists[0]['hash'], '2anfLVM')

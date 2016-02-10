@@ -49,10 +49,10 @@ class ContactManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_create_attribute(self):
-        attribute = Attribute()
+        attribute = self.attribute_manager.create()
         attribute.name = 'Attribute2'
         with HTTMock(self.create_attribute_mock):
-            saved_attribute = self.attribute_manager.save(attribute)
+            saved_attribute = attribute.save()
         self.assertTrue(isinstance(saved_attribute, Attribute))
         self.assertEqual(saved_attribute.name, 'Attribute2')
 
@@ -67,12 +67,12 @@ class ContactManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_update_existing_attribute(self):
-        attribute = Attribute()
+        attribute = self.attribute_manager.create()
         attribute.code = 'attribute'
         attribute.name = 'changed attribute'
         attribute.set_persisted()
         with HTTMock(self.update_existing_attribute_mock):
-            updated_attribute = self.attribute_manager.save(attribute)
+            updated_attribute = attribute.save()
         self.assertTrue(updated_attribute.name, 'changed attribute')
         self.assertTrue(updated_attribute.code, 'changed-attribute')
 
@@ -86,10 +86,10 @@ class ContactManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_delete_attribute(self):
-        attribute = Attribute()
+        attribute = self.attribute_manager.create()
         attribute.code = 'changed-attribute'
         with HTTMock(self.delete_attribute_mock):
-            self.attribute_manager.delete(attribute)
+            attribute.delete()
 
     @all_requests
     def get_paginated_attributes_mock(self, url, request):

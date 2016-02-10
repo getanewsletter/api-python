@@ -29,7 +29,7 @@ class ListManagerTest(unittest.TestCase):
 
     def test_update_without_hash(self):
         # Expects exception
-        list = List()
+        list = self.list_manager.create()
         list.name = 'list'
         list.sender = 'John Doe'
         list.set_persisted()
@@ -45,12 +45,12 @@ class ListManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_create_new_list(self):
-        new_list = List()
+        new_list = self.list_manager.create()
         new_list.name = 'list'
         new_list.sender = 'John Doe'
         new_list.email = 'testare@example.com'
         with HTTMock(self.create_new_list_mock):
-            saved_list = self.list_manager.save(new_list)
+            saved_list = new_list.save()
         self.assertTrue(isinstance(saved_list, List))
         self.assertEqual(saved_list.name, 'list')
 
@@ -65,13 +65,13 @@ class ListManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_update_list(self):
-        new_list = List()
+        new_list = self.list_manager.create()
         new_list.hash = 'onZQWLL'
         new_list.name = 'list two'
         new_list.sender = 'sender'
         new_list.set_persisted()
         with HTTMock(self.update_list_mock):
-            saved_list = self.list_manager.save(new_list)
+            saved_list = new_list.save()
         self.assertEqual(saved_list.name, 'list two')
         self.assertEqual(saved_list.hash, new_list.hash)
 
@@ -87,13 +87,13 @@ class ListManagerTest(unittest.TestCase):
 
     def test_overwrite_list(self):
         known_hash = 'onZQWLL'
-        new_list = List()
+        new_list = self.list_manager.create()
         new_list.hash = known_hash
         new_list.name = 'overwritten list'
         new_list.email = 'test@example.com'
         new_list.sender = 'John'
         with HTTMock(self.overwrite_list_mock):
-            overwritten_list = self.list_manager.overwrite(new_list)
+            overwritten_list = new_list.overwrite()
         self.assertEqual(overwritten_list.sender, 'John')
 
     @all_requests
@@ -106,8 +106,8 @@ class ListManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_delete_list(self):
-        new_list = List()
+        new_list = self.list_manager.create()
         new_list.hash = 'onZQWLL'
         with HTTMock(self.delete_list_mock):
-            response = self.list_manager.delete(new_list)
+            response = new_list.delete()
         self.assertEqual(response.status_code, 204)

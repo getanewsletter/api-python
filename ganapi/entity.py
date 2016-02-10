@@ -1,4 +1,7 @@
 class Entity():
+
+    def __init__(self, manager):
+        self.manager = manager
     """
      Flag showing that the entity exists or not in the storage.
     :var bool
@@ -25,3 +28,12 @@ class Entity():
         """
         self._persisted = persisted
         return self
+
+    def save(self, overwrite=False):
+        return self.manager.save(self, overwrite)
+
+    def overwrite(self):
+        return self.save(overwrite=True)
+
+    def delete(self):
+        return self.manager.delete(self)

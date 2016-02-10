@@ -64,11 +64,11 @@ class ContactManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_create_new_contact(self):
-        contact = Contact()
+        contact = self.contact_manager.create()
         contact.email = 'test@example.com'
         contact.first_name = 'John'
         with HTTMock(self.create_new_contact_mock):
-            saved_contact = self.contact_manager.save(contact)
+            saved_contact = contact.save()
         self.assertTrue(isinstance(saved_contact, Contact))
 
     @all_requests
@@ -82,19 +82,19 @@ class ContactManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_save_existing_contact(self):
-        contact = Contact()
+        contact = self.contact_manager.create()
         contact.email = 'test@example.com'
         contact.first_name = 'John'
         contact.set_persisted()
         with HTTMock(self.save_existing_contact_mock):
-            saved_contact = self.contact_manager.save(contact)
+            saved_contact = contact.save()
         self.assertTrue(isinstance(saved_contact, Contact))
 
     def test_update_without_email(self):
-        contact = Contact()
+        contact = self.contact_manager.create()
         contact.first_name = 'John'
         contact.set_persisted()
-        self.assertRaises(Exception, self.contact_manager.save, contact)
+        self.assertRaises(Exception, contact.save)
 
     @all_requests
     def overwrite_contact_mock(self, url, request):
@@ -106,11 +106,11 @@ class ContactManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_overwrite_contact(self):
-        contact = Contact()
+        contact = self.contact_manager.create()
         contact.email = 'test@example.com'
         contact.first_name = 'John'
         with HTTMock(self.overwrite_contact_mock):
-            overwritten_contact = self.contact_manager.overwrite(contact)
+            overwritten_contact = contact.overwrite()
         self.assertTrue(isinstance(overwritten_contact, Contact))
 
     @all_requests
@@ -142,8 +142,8 @@ class ContactManagerTest(unittest.TestCase):
                 'content': content}
 
     def test_delete_contact(self):
-        contact = Contact()
+        contact = self.contact_manager.create()
         contact.email = 'new_created@example.com'
         with HTTMock(self.delete_contact_mock):
-            deleted_contact_response = self.contact_manager.delete(contact)
+            deleted_contact_response = contact.delete()
             self.assertEqual(deleted_contact_response.status_code, 204)

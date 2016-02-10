@@ -69,24 +69,24 @@ except RequestException as e:
 #### Creating a contact
 ```python
 
-contact = Contact()
+contact = contact_manager.create()
 contact.email = 'jane.doe@example.com'
 contact.first_name = 'Jane'
 
-contact_manager.save(contact)
+contact.save()
 ```
 This will create a new contact and save it. Again, it'll be a good idea to catch exceptions when calling the ```save()``` method. The API will respond with an error if the contact already exists.
 One way to avoid it is to force the creation of the contact, overwriting the existing one:
 ```python
 
-contact_manager.overwrite(contact)
+contact.overwrite()
 ```
 
 Both ```save()``` and ```overwrite()``` will return the same contact object with it's read-only fields updated (e.g. ```created```, ```updated```).
 
 ```python
 
-contact = contact_manager.save(contact)
+contact = contact.save()
 print contact.created
 ```
 
@@ -98,16 +98,16 @@ contact = contact_manager.get('john.doe@example.com')
 # Change some fields.
 contact.first_name = 'John'
 # Save it.
-contact_manager.save(contact)
+contact.save()
 ```
 You can avoid making two calls to the API by forcing a *partial update*.
 ```python
 
-contact = Contact()
+contact = contact_manager.create()
 contact.set_persisted()
 contact.email = 'john.doe@example.com'
 contact.first_name = 'John'
-contactManager.save(contact)
+contact.save()
 ```
 Calling ```set_persisted()``` on the contact object marks it like it's already existing and coming from the API. The calls to the ```save()``` method when a contact is maked as existing will do only a *partial update*, i.e. update only the supplied fields and skipping all the ```None``` fields.
 Do not forget that ```email``` is a ***_lookup field_*** and required when updating or deleting the contact.
@@ -115,7 +115,7 @@ Do not forget that ```email``` is a ***_lookup field_*** and required when updat
 #### Deleting a contact
 ```python
 
-contact_manager.delete(contact)
+contact.delete()
 ```
 
 #### The list object
@@ -152,24 +152,24 @@ list = list_manager.get('hash')
 
 # Update the list.
 list.name = 'my list'
-list = list_manager.save(list)
+list = list.save()
 print list.updated
 
 # Create new list.
-new_list = List()
+new_list = list_manager.create()
 new_list.email = 'john.doe@example.com' # required fields
 new_list.name = 'my new list'
 new_list.sender = 'John Doe'
-list_manager.save(new_list)
+new_list.save()
 
 # Partial update.
-list = List()
+list = list_manager.create()
 list.hash = 'hash' # lookup field
 list.name = 'updated list'
-list_manager.save(list)
+list.save()
 
 # Delete the list.
-list_manager.delete(list)
+list.delete()
 
 ```
 
@@ -177,13 +177,13 @@ list_manager.delete(list)
 ```python
 
 contact.subscribe_to(list)
-contact_manager.save(contact)
+contact.save()
 ```
 You can also create a new contact automatically subscribed.
 ```python
 
-contact = new Contact()
+contact = contact_manager.create()
 contact.email = 'john.doe@example.com'
 contact.subscribe_to(list)
-contact_manager.save(contact)
+contact.save()
 ```

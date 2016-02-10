@@ -1,7 +1,7 @@
 import urlparse
 
 
-class PaginatedResultSet():
+class PaginatedResultSet(object):
     """
         Class to iterate result pages when searching for entities by query.
 

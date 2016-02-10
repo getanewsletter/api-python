@@ -84,7 +84,7 @@ class EntityManager(object):
          :return: The constructed entity.
          """
 
-        entity = self.entity_class()
+        entity = self.entity_class(self)
         for property in dir(entity):
             if property in data:
                 setattr(entity, property, data[property])
@@ -105,6 +105,9 @@ class EntityManager(object):
             if getattr(entity, property):
                 data[property] = getattr(entity, property)
         return data
+
+    def create(self):
+        return self.entity_class(self)
 
     def get(self, id):
         """
