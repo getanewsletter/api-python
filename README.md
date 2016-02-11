@@ -11,8 +11,10 @@ Requirements
 
 Installation
 ------------
-Via PIP pip install ganapi
-
+Via PIP:
+```bash
+pip install ganapi
+```
 
 Usage
 -----
@@ -21,7 +23,7 @@ Start by creating an instance of the ```Api``` object:
 from ganapi import Api
 
 token = '...'
-gan = Api(token)
+gan_api = Api(token)
 ```
 Here ```token``` variable must contain a valid [API token](http://help.getanewsletter.com/en/support/api-token-2/) string.
 
@@ -49,15 +51,15 @@ You have to create an instance of the ```ContactManager``` class and then use it
 ```python
 from ganapi import ContactManager
 
-contact_manager = ContactManager(gan)
+contact_manager = ContactManager(gan_api)
 contact = contact_manager.get('john.doe@example.com')
 ```
-The manager methods will throw an ```RequestException``` in case of HTTP error from the API, so it's a good idea to catch it.
+The manager methods will throw an ```HTTPError``` in case of HTTP error from the API, so it's a good idea to catch it.
 ```python
 
 try:
     contact = contact_manager.get('john.doe@example.com')
-except RequestException as e:
+except HTTPError as e:
     if e.response.code == 404:
         print 'Contact not found!'
     else:
@@ -165,7 +167,7 @@ The instances of the List class represent the [lists](http://help.getanewsletter
 The CRUD operations on lists are no different from the operations on contacts:
 ```python
 
-list_manager = ListManager(gan)
+list_manager = ListManager(gan_api)
 
 # Retrieve a list.
 list = list_manager.get('hash')
@@ -229,15 +231,15 @@ You have to create an instance of the ```AttributeManager``` class and then use 
 ```python
 from ganapi import AttributeManager
 
-attribute_manager = AttributeManager(gan)
+attribute_manager = AttributeManager(gan_api)
 attribute = attribute_manager.get('code')
 ```
-The manager methods will throw an ```RequestException``` in case of HTTP error from the API, so it's a good idea to catch it.
+The manager methods will raise a ```HTTPError``` in case of HTTP error from the API, so it's a good idea to catch it.
 ```python
 
 try:
     attribute = attribute_manager.get('code')
-except RequestException as e:
+except HttpError as e:
     if e.response.code == 404:
         print 'Attribute not found!'
     else:
@@ -318,7 +320,7 @@ The instance of the PaginatedResultSet class represent the result of get from th
 * ```next()``` - replaces the instance with results from the next page and returns entities.
 
 ```next()``` and ```prev()``` will raise ```StopIteration``` if the end of the direction has been reached.
-They will raise ```RequestException``` in case of HTTP error from the API,
+They will raise ```HTTPError``` in case of HTTP error from the API,
 
 
 
