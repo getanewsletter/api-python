@@ -2,7 +2,7 @@ import unittest
 from api import Api
 from attribute import Attribute
 from attribute_manager import AttributeManager
-from httmock import HTTMock, all_requests
+from httmock import HTTMock, all_requests, urlmatch
 from requests import HTTPError
 
 
@@ -10,6 +10,7 @@ class ContactManagerTest(unittest.TestCase):
     def setUp(self):
         gan_token = 'h027MapNNujPH0gV+sXAdmzZTDffHOpJEHaBtrD3NXtNqI4dT3NLXhyTwiZr7PUOGZJNSGv/b9xVyaguX0nDrONGhudPkxtl5EoXrM4SOZHswebpSy2ehh0edrGVF7dVJVZLIlRwgViY3n3/2hMQ5Njp9JFywnOy7gMeaoKw0hYLRbd+wVqvl2oOnspXwGTTcZ9Y+cdP8jIhUUoXOieXst0IXVclAHXa+K1d15gKLcpmXzK+jx14wGEmb4t8MSU'
         self.api = Api(token=gan_token)
+        self.api.batch_size = 2
         self.attribute_manager = AttributeManager(self.api)
         self.start_path = '/v3'
 
@@ -122,3 +123,44 @@ class ContactManagerTest(unittest.TestCase):
         self.assertEqual(len(paginated_result_set.entities), 6)
 
         self.assertRaises(StopIteration, paginated_result_set.next)
+
+    @all_requests
+    def get_all_attr_mock(self, url, request):
+        status_code = 200
+        if url.query == 'paginate_by=2':
+            content = '{"count":8,"next":"https://api.getanewsletter.com/v3/attributes/?page=2&paginate_by=2","previous":null,"results":[{"url":"https://api.getanewsletter.com/v3/attributes/attribute/","name":"attr0","code":"attribute","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/attribute2/","name":"attr1","code":"attribute2","usage_count":0}]}'
+        elif url.query in ['page=2&paginate_by=2'] :
+            content = '{"count":8,"next":"https://api.getanewsletter.com/v3/attributes/?page=3&paginate_by=2","previous":"https://api.getanewsletter.com/v3/attributes/?paginate_by=2","results":[{"url":"https://api.getanewsletter.com/v3/attributes/bu/","name":"attr2","code":"bu","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu1/","name":"attr3","code":"bu1","usage_count":0}]}'
+
+        elif url.query == 'page=3&paginate_by=2' or url.query == 'paginate_by=2&page=3':
+            content = '{"count":8,"next":"https://api.getanewsletter.com/v3/attributes/?page=4&paginate_by=2","previous":"https://api.getanewsletter.com/v3/attributes/?page=2&paginate_by=2","results":[{"url":"https://api.getanewsletter.com/v3/attributes/bu2/","name":"attr4","code":"bu2","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu3/","name":"bu3","code":"bu3","usage_count":0}]}'
+
+        elif url.query == 'page=4&paginate_by=2':
+            content = '{"count":8,"next":"https://api.getanewsletter.com/v3/attributes/?page=5&paginate_by=2","previous":"https://api.getanewsletter.com/v3/attributes/?page=3&paginate_by=2","results":[{"url":"https://api.getanewsletter.com/v3/attributes/bu4/","name":"bu4","code":"bu4","usage_count":0},{"url":"https://api.getanewsletter.com/v3/attributes/bu5/","name":"bu5","code":"bu5","usage_count":0}]}'
+        else:
+            return {'status_code': 404}
+
+        return {'content': content,
+                'status_code': status_code}
+
+    def test_get_all_attributes(self):
+        with HTTMock(self.get_all_attr_mock):
+            all_attributes = self.attribute_manager.all()
+            attrs = [attr for attr in all_attributes]
+            self.assertEqual(len(attrs), 8)
+
+    def test_get_between_attributes(self):
+        with HTTMock(self.get_all_attr_mock):
+            self.assertEqual(self.api.batch_size, 2)
+            # should get entities from page 3 and 4
+            attributes_between = self.attribute_manager.all(start=4, stop=7)
+            attrs = [attr for attr in attributes_between]
+            self.assertEqual(len(attrs), 4)
+            self.assertEqual(attrs[0].name, 'attr4')
+            self.assertTrue(isinstance(attrs[0], Attribute))
+
+    def test_get_too_high_start(self):
+        with HTTMock(self.get_all_attr_mock):
+            attributes_between = self.attribute_manager.all(start=9)
+            attrs = [attr for attr in attributes_between]
+            self.assertEqual(len(attrs), 0)

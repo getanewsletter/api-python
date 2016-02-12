@@ -1,6 +1,8 @@
 import json
 import requests
 from gan_exception import GanException
+
+
 class Api(object):
     """
         Handles connection to the API
@@ -12,6 +14,11 @@ class Api(object):
     """
     default_base_uri = 'https://api.getanewsletter.com/v3/'
 
+    """
+        The amount of entities to get in each request while using all
+        :var batch_size int
+    """
+    batch_size = 25
     """
         Initializes the API connection
         :param string token The security token.

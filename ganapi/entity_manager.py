@@ -1,6 +1,8 @@
 import urllib
 from helpers import PaginatedResultSet
 from api import GanException
+import urlparse
+import math
 
 class EntityManager(object):
     """
@@ -184,6 +186,61 @@ class EntityManager(object):
         if as_json:
             return response.json()
         return PaginatedResultSet(self, response.json())
+
+    def all(self, start=0, stop=float('inf')):
+        """
+        Method to get a generator with all or between(start, stop) entities of type.
+        Will use Api.batch_size for pagination parameter to the api.
+        When using start argument it will jump to the correct page after first request
+        if the start item is not on the first page.
+        :param start Start from entity index.
+        :param stop Stop at entity index.
+        :raises StopIteration if end of entities or too high start.
+        :raises AssertionError if start or stop are invalid.
+        :raises HTTPError if the data can not be fetched.
+        :return: generator with entities of type.
+        """
+
+        def _calc_item_page(index, total, page_size):
+            # Calculate item page based on index
+            return math.ceil(float(((index + 1) % total)) / page_size)
+
+        if start:
+            assert isinstance(start, int)
+        if stop != float('inf'):
+            assert isinstance(stop, int)
+        assert start <= stop
+
+        uri = u'{base_path}/?paginate_by={batch_size}'.format(base_path=str.rstrip(self.base_path),
+                                                              batch_size=self.api.batch_size)
+        count = None
+        count_read = 0
+        while uri and (count is None or count_read < count) and count_read <= stop:
+            results = self.api.call('GET', uri).json()
+            count = results.get('count', 0)
+
+            if start > count:
+                raise StopIteration
+
+            for entity in results.get('results', []):
+                if start <= count_read <= stop:
+                    yield self.construct_entity(entity).set_persisted()
+                count_read += 1
+
+            if self.api.batch_size < start and start > count_read + 1:
+                # Go straight to supposed page of the start item.
+                start_page = int(_calc_item_page(start, count, self.api.batch_size))
+                uri = u'{base_path}/?paginate_by={batch_size}&page={page}'.format(base_path=str.rstrip(self.base_path),
+                                                                                  batch_size=self.api.batch_size,
+                                                                                  page=start_page)
+                # Set new count_read for all skipped pages.
+                count_read = (start_page - 1) * self.api.batch_size
+            else:
+                if results.get('next'):
+                    uri = u'{base_path}/?{params}'.format(base_path=str.rstrip(self.base_path),
+                                                          params=urlparse.urlparse(results.get('next')).query)
+
+        return
 
     def delete(self, entity):
         """
