@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(name='ganapi',
       packages = ['ganapi'],
-      version='0.1',
+      version='v0.1.0',
       description='Get a Newsletter REST API wrapper',
       license='MIT',
       author='Get a Newsletter',
