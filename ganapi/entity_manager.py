@@ -4,6 +4,7 @@ from api import GanException
 import urlparse
 import math
 
+
 class EntityManager(object):
     """
     Base entity manager.
@@ -166,7 +167,7 @@ class EntityManager(object):
         """
         return self.save(entity, True)
 
-    def query(self, filters=dict(), as_json=False):
+    def query(self, filters=None, as_json=False):
         """
         Low level method for making search queries.
 
@@ -179,6 +180,8 @@ class EntityManager(object):
         :returns class PaginatedResultSet which can iterate over pages PaginatedResultSet.entities is the current page list of entities.
         :raises RequestException if there is an error from the API.
         """
+        if not filters:
+            filters = dict()
         uri = u'{base_path}/?{encoded_filters}'.format(base_path=str.rstrip(self.base_path),
                                                        encoded_filters=urllib.urlencode(filters))
         response = self.api.call('GET', uri)

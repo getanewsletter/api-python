@@ -15,7 +15,8 @@ class Contact(Entity):
     updated = None
     created = None
 
-    def hash_in_contacts_lists(self, hash, list):
+    @staticmethod
+    def hash_in_contacts_lists(hash, list):
 
         if any(sub['hash'] == hash for sub in list):
             return True

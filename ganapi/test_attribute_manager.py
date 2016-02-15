@@ -2,7 +2,7 @@ import unittest
 from api import Api
 from attribute import Attribute
 from attribute_manager import AttributeManager
-from httmock import HTTMock, all_requests, urlmatch
+from httmock import HTTMock, all_requests
 from requests import HTTPError
 
 

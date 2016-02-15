@@ -1,5 +1,4 @@
 from api import Api
-from contact import Contact
 from contact_manager import ContactManager
 from list_manager import ListManager
 import unittest
@@ -40,8 +39,6 @@ class ContactTest(unittest.TestCase):
         return {'status_code': 201,
                 'content': content}
 
-
-
     def test_subscribe_to_list(self):
         new_contact = self.contact_manager.create()
         new_contact.email = 'tester@example.com'
@@ -55,7 +52,6 @@ class ContactTest(unittest.TestCase):
         with HTTMock(self.subscribed_contact_mock):
             saved_contact = new_contact.save()
         self.assertEqual(saved_contact.lists[0]['hash'], '2anfLVM')
-
 
     def test_unsubcribe_from_list(self):
         new_contact = self.contact_manager.create()

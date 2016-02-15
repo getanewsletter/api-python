@@ -29,7 +29,8 @@ class PaginatedResultSet(object):
             list.append(self.manager.construct_entity(result).set_persisted())
         return list
 
-    def url_params_to_dict(self, url):
+    @staticmethod
+    def url_params_to_dict(url):
         """
         :param url: url to get parameters from
         :return: parsed parameters as dict
