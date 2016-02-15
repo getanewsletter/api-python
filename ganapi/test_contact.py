@@ -31,6 +31,17 @@ class ContactTest(unittest.TestCase):
         return {'status_code': status_code,
                 'content': content}
 
+    @all_requests
+    def contact_unsubscribe_mock(self, url, request):
+        self.assertEqual(url.path, self.start_path + '/contacts/tester@example.com/')
+        payload = '{"attributes": {}, "email": "tester@example.com", "lists": [{"hash": "2anfLVM", "name": "Test list", "subscription_cancelled": null, "subscription_created": "2016-02-09T08:17:10Z", "cancelled": true, "subscription_id": 136363367}]}'
+        self.assertEqual(request.body, payload)
+        content = '{"url":"https://api.getanewsletter.com/v3/contacts/tester@example.com/","first_name":"","last_name":"","email":"tester@example.com","created":"2016-02-08T14:48:24","updated":"2016-02-09T09:09:28.878356","attributes":{},"lists":[{"subscription_cancelled":"2016-02-15T06:50:44Z","subscription_id":136363367,"hash":"2anfLVM","name":"Test list","subscription_created":"2016-02-09T08:17:10Z"}],"active":true}'
+        return {'status_code': 201,
+                'content': content}
+
+
+
     def test_subscribe_to_list(self):
         new_contact = self.contact_manager.create()
         new_contact.email = 'tester@example.com'
@@ -44,3 +55,53 @@ class ContactTest(unittest.TestCase):
         with HTTMock(self.subscribed_contact_mock):
             saved_contact = new_contact.save()
         self.assertEqual(saved_contact.lists[0]['hash'], '2anfLVM')
+
+
+    def test_unsubcribe_from_list(self):
+        new_contact = self.contact_manager.create()
+        new_contact.email = 'tester@example.com'
+        with HTTMock(self.contact_mock):
+            new_contact = new_contact.save()
+        self.assertEqual(new_contact.lists, [])
+
+        list = self.list_manager.construct_entity({'hash': '2anfLVM'})
+        new_contact.subscribe_to(list)
+        self.assertEqual(len(new_contact.lists), 1)
+        with HTTMock(self.subscribed_contact_mock):
+            saved_contact = new_contact.save()
+        self.assertEqual(saved_contact.lists[0]['hash'], '2anfLVM')
+
+        with HTTMock(self.contact_unsubscribe_mock):
+            saved_contact.unsubscribe_from(list)
+            new_contact = saved_contact.save()
+            self.assertEqual(len(new_contact.lists), 1)
+            self.assertEqual(new_contact.lists[0]['hash'], '2anfLVM')
+            self.assertEqual(new_contact.lists[0]['subscription_cancelled'], u'2016-02-15T06:50:44Z')
+
+    @all_requests
+    def contact_remove_sub_mock(self, url, request):
+        self.assertEqual(url.path, self.start_path + '/contacts/tester@example.com/')
+        payload = '{"attributes": {}, "email": "tester@example.com", "lists": []}'
+        self.assertEqual(request.body, payload)
+        content = '{"url":"https://api.getanewsletter.com/v3/contacts/tester@example.com/","first_name":"","last_name":"","email":"tester@example.com","created":"2016-02-08T14:48:24","updated":"2016-02-09T09:09:28.878356","attributes":{},"lists":[],"active":true}'
+        return {'status_code': 201,
+                'content': content}
+
+    def tests_remove_subscription(self):
+        new_contact = self.contact_manager.create()
+        new_contact.email = 'tester@example.com'
+        with HTTMock(self.contact_mock):
+            new_contact = new_contact.save()
+        self.assertEqual(new_contact.lists, [])
+
+        list = self.list_manager.construct_entity({'hash': '2anfLVM'})
+        new_contact.subscribe_to(list)
+        self.assertEqual(len(new_contact.lists), 1)
+        with HTTMock(self.subscribed_contact_mock):
+            saved_contact = new_contact.save()
+        self.assertEqual(saved_contact.lists[0]['hash'], '2anfLVM')
+
+        with HTTMock(self.contact_remove_sub_mock):
+            saved_contact.delete_subscription_from(list)
+            saved_contact = saved_contact.save()
+        self.assertEqual(len(saved_contact.lists), 0)

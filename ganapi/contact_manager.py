@@ -36,8 +36,12 @@ class ContactManager(EntityManager):
         data['lists'] = []
         if isinstance(getattr(entity, 'lists'), type([])):
             for list in entity.lists:
-                norm = list_manager.normalize_entity(list)
-                norm['hash'] = list.hash
+                if isinstance(list, list_manager.entity_class):
+                    norm = list_manager.normalize_entity(list)
+                    norm['hash'] = list.hash
+                else:
+                    norm = list
+
                 data['lists'].append(norm)
 
         return data
