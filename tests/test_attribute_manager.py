@@ -1,7 +1,5 @@
 import unittest
-from api import Api
-from attribute import Attribute
-from attribute_manager import AttributeManager
+from ganapi import Api, Attribute, AttributeManager
 from httmock import HTTMock, all_requests
 from requests import HTTPError
 

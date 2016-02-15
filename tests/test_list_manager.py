@@ -1,9 +1,7 @@
 import unittest
-from api import Api
-from list import List
-from list_manager import ListManager
+from ganapi import Api, List, ListManager, GanException
 from httmock import HTTMock, all_requests
-from gan_exception import GanException
+
 
 class ListManagerTest(unittest.TestCase):
     def setUp(self):

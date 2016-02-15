@@ -1,6 +1,4 @@
-from api import Api
-from contact_manager import ContactManager
-from list_manager import ListManager
+from ganapi import Api, ContactManager, ListManager
 import unittest
 from httmock import HTTMock, all_requests
 

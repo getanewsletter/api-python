@@ -1,7 +1,5 @@
 import unittest
-from api import Api, GanException
-from contact import Contact
-from contact_manager import ContactManager
+from ganapi import Api, GanException, Contact, ContactManager
 from httmock import HTTMock, all_requests
 from requests import HTTPError
 

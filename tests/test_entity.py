@@ -1,5 +1,5 @@
 import unittest
-from entity import Entity
+from ganapi.entity import Entity
 
 
 class EntityTest(unittest.TestCase):
