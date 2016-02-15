@@ -209,7 +209,18 @@ contact.email = 'john.doe@example.com'
 contact.subscribe_to(list)
 contact.save()
 ```
+#### Unsubscribing a contact from a list
+```python
 
+contact.unsubscribe_from(list)
+contact.save()
+```
+#### Deleting a contacts subscription from a list
+```python
+
+contact.delete_subscription_from(list)
+contact.save()
+```
 
 #### The attribute object
 The instances of the Attribute class represent the attribute entities in the API.
@@ -256,14 +267,14 @@ attribute.name = 'City'
 
 attribute.save()
 ```
-This will create a new attribute and save it. Again, it'll be a good idea to catch exceptions when calling the ```save()``` method. The API will respond with an error if the contact already exists.
-One way to avoid it is to force the creation of the contact, overwriting the existing one:
+This will create a new attribute and save it. Again, it'll be a good idea to catch exceptions when calling the ```save()``` method. The API will respond with an error if the attribute already exists.
+One way to avoid it is to force the creation of the attribute, overwriting the existing one:
 ```python
 
 attribute.overwrite()
 ```
 
-Both ```save()``` and ```overwrite()``` will return the same contact object with it's read-only fields updated (e.g. ```url```, ```usage_count```).
+Both ```save()``` and ```overwrite()``` will return the same attribute object with it's read-only fields updated (e.g. ```url```, ```usage_count```).
 
 ```python
 
@@ -290,13 +301,33 @@ attribute.code = 'code'
 attribute.name = 'Changed!'
 attribute.save()
 ```
-Calling ```set_persisted()``` on the attribute object marks it like it's already existing and coming from the API. The calls to the ```save()``` method when a contact is made as existing will do only a *partial update*, i.e. update only the supplied fields and skipping all the ```None``` fields.
+Calling ```set_persisted()``` on the attribute object marks it like it's already existing and coming from the API. The calls to the ```save()``` method when a attribute is made as existing will do only a *partial update*, i.e. update only the supplied fields and skipping all the ```None``` fields.
 Do not forget that ```code``` is a ***_lookup field_*** and required when updating or deleting the attribute.
 
 #### Deleting an attribute
 ```python
 
 attribute.delete()
+```
+
+### Get all entities of type
+You can get all contacts, lists or attributes in a generator using the ```all()``` method on their manager.
+
+*Parameters*
+* ```start``` - start index (default: 0)
+* ```stop``` stop index (default: float('inf'))
+
+
+```python
+# Print all contacts emails
+all_contacts = contact_manager.all()
+for contact in all_contacts:
+    print contact.email
+    
+
+# Get a generator starting on contact 100 stopping on contact 200
+all_contacts = contact_manager.all(start=100, stop=200)
+
 ```
 
 
@@ -321,6 +352,3 @@ The instance of the PaginatedResultSet class represent the result of get from th
 
 ```next()``` and ```prev()``` will raise ```StopIteration``` if the end of the direction has been reached.
 They will raise ```HTTPError``` in case of HTTP error from the API,
-
-
-
