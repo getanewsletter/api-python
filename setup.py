@@ -10,4 +10,6 @@ setup(name='ganapi',
       url='https://github.com/getanewsletter/api-python',
       keywords= ['Get a newsletter', 'ganapi'],
       download_url='https://github.com/getanewsletter/api-python/tarball/0.1',
-      classifiers=[])
+      classifiers=[],
+      install_requires=['requests==2.2.1']
+      )
